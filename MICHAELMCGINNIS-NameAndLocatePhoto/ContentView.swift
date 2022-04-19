@@ -18,6 +18,12 @@ struct ContentView: View {
     let defaultImage = Image(systemName: "star.fill")
     let locationFetcher = LocationFetcher()
     
+    //To remove from ForEach
+    func removeRows(at offsets: IndexSet) {
+        photos.photosArr.remove(atOffsets: offsets)
+        photos.save()
+    }
+    
     func loadImage(){
         guard let inputImage = inputImage else {
             return
@@ -53,6 +59,7 @@ struct ContentView: View {
                         .scaledToFit()
                     TextField("Name me! ", text: $imgName)
                         .padding()
+                        .disabled(locations.count > 0)
                     //map
                     ZStack{
                         Map(coordinateRegion: $mapRegion, annotationItems: locations){ location in
@@ -109,6 +116,7 @@ struct ContentView: View {
                         locations = []
                         //save image and add to list
                     }
+                    .disabled(locations.count == 0)
                 }
                 List{
                     ForEach(photos.photosArr.sorted()) { photo in
@@ -124,6 +132,7 @@ struct ContentView: View {
                             }
                         }
                     }
+                    .onDelete(perform: removeRows)
                 }
             }
             .sheet(isPresented: $showingImagePicker){
@@ -134,6 +143,7 @@ struct ContentView: View {
                     Button("Add Image"){
                         showingImagePicker = true
                     }
+                    .disabled(image != nil)
                 }
             }
             .onChange(of: inputImage){ _ in
